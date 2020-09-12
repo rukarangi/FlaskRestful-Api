@@ -28,7 +28,7 @@ def listGet():
 	db.close()
 	return tasks
 
-def listAdd(title, description):
+def listPost(title, description):
 	db.connect()
 	taskIds = [task.i for task in Task.select()]
 	newId = (taskIds[-1] + 1) if len(taskIds) > 0 else 1
@@ -44,7 +44,6 @@ def listAdd(title, description):
 	db.close()
 	return taskMToDict(task)
 
-#@dbDecorator
 def taskGet(i):
 	db.connect()
 	try:
@@ -55,8 +54,32 @@ def taskGet(i):
 	db.close()
 	return task
 
-def taskRemove(i):
-	pass
+def taskPut(i, done):
+	db.connect()
+	try:
+		task = Task.get(Task.i == i)
+		task.done = done
+		task.save()
+		task = taskMToDict(task)
+		task["response"] = 200
+	except DoesNotExist:
+		task = {"i": 1, "title": "Not Found", "response": 404}
+	db.close()
+	return task
+
+def taskDelete(i):
+	db.connect()
+	try:
+		taskM = Task.get(Task.i == i)
+		query = Task.update(i=Task.i-1).where(Task.i > taskM.i)
+		query.execute()
+		taskM.delete_instance()
+
+		task = {"deleted": "True", "response": 200}
+	except DoesNotExist:
+		task = {"i": 1, "title": "Not Found", "response": 404}
+	db.close()
+	return task
 
 def taskMToDict(taskM):
 	task = {

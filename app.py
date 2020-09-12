@@ -1,7 +1,7 @@
 from flask import Flask, url_for
 from flask_restful import Api, Resource, reqparse, marshal, fields
 
-from databaseControl import initialise, Task, db, listGet, listAdd, taskGet, taskRemove
+from databaseControl import initialise, Task, db, listGet, listPost, taskGet, taskPut, taskDelete
 
 #Setup App and Api objects
 
@@ -37,7 +37,7 @@ class TaskListAPI(Resource):
 
 	def post(self):
 		args = self.reqparse.parse_args()
-		task = listAdd(args["title"], args["description"])
+		task = listPost(args["title"], args["description"])
 		return {"task": marshal(task, taskGuide)}
 
 class TaskAPI(Resource):
@@ -54,10 +54,14 @@ class TaskAPI(Resource):
 		return {"task": marshal(task, taskGuide)}, task["response"]
 
 	def put(self, i):
-		pass
+		args = self.reqparse.parse_args()
+		print(args["done"])
+		task = taskPut(i, args["done"])
+		return {"task": marshal(task, taskGuide)}, task["response"]
 
 	def delete(self, i):
-		pass
+		task = taskDelete(i)
+		return {"task": task}, task["response"]
 
 api.add_resource(TaskListAPI, "/todo/api/v1.0/tasks", endpoint = "tasks")
 api.add_resource(TaskAPI, "/todo/api/v1.0/tasks/<int:i>", endpoint = "task")

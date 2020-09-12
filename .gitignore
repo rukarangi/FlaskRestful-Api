@@ -1,2 +1,3 @@
 venv/
 tasks.sqlite
+__pycache__/
